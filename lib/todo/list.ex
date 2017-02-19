@@ -15,6 +15,10 @@ defmodule Todo.List do
     GenServer.cast(list, {:add, item})
   end
 
+  def delete(list, item) do
+    GenServer.cast(list, {:delete, item})
+  end
+
   def update(list, item) do
     GenServer.cast(list, {:update, item})
   end
@@ -42,6 +46,12 @@ defmodule Todo.List do
 
   def handle_cast({:add, item}, state) do
     state = %{state | items: [item | state.items]}
+    Cache.save(state)
+    {:noreply, state}
+  end
+
+  def handle_cast({:delete, item}, state) do
+    state = %{state | items: List.delete(state.items, item)}
     Cache.save(state)
     {:noreply, state}
   end

@@ -3,18 +3,18 @@ defmodule Todo.Cache do
   import String, only: [to_atom: 1]
 
   def save(list) do
-    :ets.insert(__MODULE__, {to_atom(list.name), list})
+    :dets.insert(__MODULE__, {to_atom(list.name), list})
   end
 
   def find(list_name) do
-    case :ets.lookup(__MODULE__, to_atom(list_name)) do
+    case :dets.lookup(__MODULE__, to_atom(list_name)) do
       [{_id, value}] -> value
       [] -> nil
     end
   end
 
   def clear do
-    :ets.delete_all_objects(__MODULE__)
+    :dets.delete_all_objects(__MODULE__)
   end
 
   ###
@@ -26,7 +26,7 @@ defmodule Todo.Cache do
   end
 
   def init(_) do
-    table = :ets.new(__MODULE__, [:named_table, :public])
+    table = :dets.open_file(__MODULE__, [])
     {:ok, table}
   end
 end

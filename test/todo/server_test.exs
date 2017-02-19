@@ -34,6 +34,17 @@ defmodule Todo.ServerTest do
     Server.delete_list(list)
     counts = Supervisor.count_children(Server)
 
-    assert counts.active == 0
+    assert counts.active == 1
+  end
+
+  test "restores list when recovering" do
+    Server.add_list("home")
+    Server.add_list("work")
+
+    Supervisor.restart_child(Todo.Supervisor, Server)
+
+    counts = Supervisor.count_children(Server)
+
+    assert counts.active == 2
   end
 end

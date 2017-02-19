@@ -7,11 +7,16 @@ defmodule Todo.CacheTest do
     list = %{name: "Home", items: []}
     Cache.save(list)
 
+    on_exit fn ->
+      :dets.close(Cache)
+      File.rm(Atom.to_string(Cache))
+    end
+
     {:ok, list: list}
   end
 
   test ".save adds a list to the ETS table" do
-    info = :ets.info(Cache)
+    info = :dets.info(Cache)
     assert info[:size] == 1
   end
 
@@ -23,4 +28,14 @@ defmodule Todo.CacheTest do
     Cache.clear
     refute Cache.find(list.name)
   end
+
+  test "lists should be persisted across processes", %{list: list} do
+    assert Cache.find(list.name) == list
+
+    Cache
+    |> Process.whereis
+    |> Process.exit(:normal)
+
+    assert Cache.find(list.name) == list
+  end  
 end
